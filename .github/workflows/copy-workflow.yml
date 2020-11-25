@@ -1,0 +1,54 @@
+on:
+  push:
+  pull_request_target: # TODO: only for testing. In production, only run for commits to master.
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.set-matrix.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          TARGETS=$(jq -c . .github/workflows/config.json)
+          echo "::set-output name=targets::$TARGETS"
+  copy:
+    needs: [ matrix ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cfg: ${{ fromJson(needs.matrix.outputs.targets) }}
+    env:
+      NEEDS_UPDATE: 0
+    name: Copy unit.yml to ${{ matrix.cfg.target }}
+    steps:
+    - name: Checkout ${{ matrix.cfg.target }}
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ matrix.cfg.target }}
+    - name: Checkout workflow templates
+      uses: actions/checkout@v2
+      with:
+        path: remote_repo # todo: find better path
+    - name: Check if an update to unit.yml is neccessary
+      run: |
+        STATUS=$(cmp --silent .github/workflows/unit.yml remote_repo/workflow-templates/unit.yml; echo $?)
+        if [[ $STATUS -ne 0 ]]; then
+          echo "Update needed."
+          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
+        else
+          echo "Files indentical. Skipping."
+        fi
+    - name: Copy unit.yml to target repo
+      if: ${{ env.NEEDS_UPDATE == 1 }}
+      run: |
+        mkdir -p .github/workflows/
+        cp remote_repo/workflow-templates/unit.yml .github/workflows/
+    - name: Create Pull Request
+      if: ${{ env.NEEDS_UPDATE == 1 }}
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: update unit.yml
+        title: update unit.yml workflow
+        body: update to https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+        token: ${{ secrets.GITHUB_TOKEN }} # TODO: create a new user (libp2p-bot?) and generate a Personal Access Token
