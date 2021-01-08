@@ -64,7 +64,11 @@ jobs:
       with:
         commit-message: update ${{ env.FILE }}
         title: update ${{ matrix.workflow }} workflow
-        body: update to https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+        body: |
+          update to https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
+          ---
+          You can trigger a rebase by commenting `@ipldbot rebase`.
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         committer: ipldbot <ipldbot@users.noreply.github.com>
         author: ipldbot <ipldbot@users.noreply.github.com>
