@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         cfg: ${{ fromJson(needs.matrix.outputs.targets) }}
-        workflow: [ "automerge", "go-test", "go-check" ]
+        workflow: [ "automerge", "autorebase", "go-test", "go-check" ]
     env:
       WORKFLOW_DIR: "workflow-repo"
       FILE: "${{ matrix.workflow }}.yml"
