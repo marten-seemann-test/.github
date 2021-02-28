@@ -1,10 +1,11 @@
 on:
-  push:
-    branches:
-      - master
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
 
 jobs:
   matrix:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       targets: ${{ steps.set-matrix.outputs.targets }}
@@ -15,6 +16,7 @@ jobs:
           TARGETS=$(jq -c . .github/workflows/config.json)
           echo "::set-output name=targets::$TARGETS"
   copy:
+    if: github.event.pull_request.merged == true
     needs: [ matrix ]
     runs-on: ubuntu-latest
     strategy:
@@ -28,6 +30,8 @@ jobs:
       NEEDS_UPDATE: 0
     name: Update ${{ matrix.workflow }} on ${{ matrix.cfg.target }}
     steps:
+    - name: Event JSON
+      run: cat "$GITHUB_EVENT_PATH" | jq -M .
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
