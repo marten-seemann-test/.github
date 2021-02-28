@@ -33,7 +33,7 @@ jobs:
     - name: Event JSON
       run: cat "$GITHUB_EVENT_PATH" | jq -M .
     - name: Pull Reqeust Link
-      run: echo ${{ github.event.url }}
+      run: echo ${{ github.event.pull_request.url }}
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
