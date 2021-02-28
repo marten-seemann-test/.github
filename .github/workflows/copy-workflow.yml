@@ -71,9 +71,9 @@ jobs:
       uses: peter-evans/create-pull-request@v3
       with:
         commit-message: update ${{ env.FILE }}
-        title: update ${{ matrix.workflow }} workflow
+        title: "${{ matrix.workflow }}: ${{ github.event.pull_request.title }}"
         body: |
-          update to https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+          Change introduced by ${{ github.event.pull_request.html_url }}.
 
           ---
           You can trigger a rebase by commenting `@ipldbot rebase`.
