@@ -70,7 +70,7 @@ jobs:
       if: ${{ env.NEEDS_UPDATE == 1 }}
       uses: peter-evans/create-pull-request@v3
       with:
-        commit-message: update ${{ env.FILE }}
+        commit-message: "update ${{ env.FILE }}: ${{ github.event.pull_request.title }}"
         title: "${{ matrix.workflow }}: ${{ github.event.pull_request.title }}"
         body: |
           Change introduced by ${{ github.event.pull_request.html_url }}.
