@@ -32,6 +32,8 @@ jobs:
     steps:
     - name: Event JSON
       run: cat "$GITHUB_EVENT_PATH" | jq -M .
+    - name: Pull Reqeust Link
+      run: echo ${{ github.event.url }}
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
