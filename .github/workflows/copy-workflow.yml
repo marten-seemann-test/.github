@@ -19,9 +19,9 @@ jobs:
     - name: Event JSON
       run: cat "$GITHUB_EVENT_PATH" | jq -M .
     - name: Pull Reqeust Link
-      run: echo ${{ github.event.client_payload.github.pull_request.html_url }}
+      run: echo ${{ github.event.client_payload.github.event.pull_request.html_url }}
     - name: Pull Request Title
-      run: echo ${{ github.event.client_payload.github.pull_request.title }}
+      run: echo ${{ github.event.client_payload.github.event.pull_request.title }}
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
@@ -54,12 +54,12 @@ jobs:
         rm -rf $WORKFLOW_DIR
     - name: Create Pull Request
       if: ${{ env.NEEDS_UPDATE == 1 }}
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
       with:
-        commit-message: "update ${{ env.FILE }}: ${{ github.event.client_payload.github.pull_request.title }}"
-        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.client_payload.githubpull_request.title }}"
+        commit-message: "update ${{ env.FILE }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
+        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.event.pull_request.title }}"
         body: |
-          Change introduced by ${{ github.event.client_payload.github.pull_request.html_url }}.
+          Change introduced by ${{ github.event.client_payload.github.event.pull_request.html_url }}.
           ---
           You can trigger a rebase by commenting `@ipldbot rebase`.
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
