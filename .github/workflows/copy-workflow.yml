@@ -8,6 +8,4 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - run: jq . ${{ github.event.client_payload.targets }}
-      - run: jq . ${{ github.event.client_payload.workflows }}
-      - run: jq . ${{ github.event.client_payload.github.sha }}
+      - run: cat "$GITHUB_EVENT_PATH" | jq -M .
