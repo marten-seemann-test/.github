@@ -1,3 +1,6 @@
 [
-  { "target": "marten-seemann-test/target" }
+  { "target": "marten-seemann-test/target" },
+  { "target": "marten-seemann-test/target2" },
+  { "target": "marten-seemann-test/target3" },
+  { "target": "marten-seemann-test/target4" }
 ]
