@@ -10,7 +10,6 @@ jobs:
       matrix:
         cfg: ${{ github.event.client_payload.targets }}
         workflow: ${{ github.event.client_payload.workflows }}
-    name: ${{ matrix.workflow }} workflow
     env:
       WORKFLOW_DIR: "workflow-repo"
       FILE: "${{ matrix.workflow }}.yml"
