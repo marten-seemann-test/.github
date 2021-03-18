@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - id: set-matrix
         run: |
-          TARGETS=$(jq -c '. | _nwise(3)' .github/workflows/config.json | jq -s '. | to_entries')
+          TARGETS=$(jq '. | _nwise(3)' .github/workflows/config.json | jq -sc '. | to_entries')
+          echo $TARGETS
           echo "::set-output name=targets::$TARGETS"
   dispatch:
     if: github.event.pull_request.merged == true
