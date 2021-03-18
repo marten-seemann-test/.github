@@ -57,7 +57,7 @@ jobs:
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
       with:
         commit-message: "update ${{ env.FILE }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
-        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.event.pull_request.title }}"
+        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
         body: |
           Change introduced by ${{ github.event.client_payload.github.event.pull_request.html_url }}.
           ---
