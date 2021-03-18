@@ -1,29 +1,15 @@
 on:
-  pull_request:
-    branches: [ master ]
-    types: [ closed ]
+  repository_dispatch:
+    types: [ copy-workflow ]
 
 jobs:
-  matrix:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    outputs:
-      targets: ${{ steps.set-matrix.outputs.targets }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: set-matrix
-        run: |
-          TARGETS=$(jq -c . .github/workflows/config.json)
-          echo "::set-output name=targets::$TARGETS"
   copy:
-    if: github.event.pull_request.merged == true
-    needs: [ matrix ]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        cfg: ${{ fromJson(needs.matrix.outputs.targets) }}
-        workflow: [ "automerge", "autorebase", "go-test", "go-check" ]
+        cfg: ${{ fromJson(github.event.client_payload.targets) }}
+        workflow: ${{ fromJson(github.event.client_payload.workflows) }}
     env:
       WORKFLOW_DIR: "workflow-repo"
       FILE: "${{ matrix.workflow }}.yml"

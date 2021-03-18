@@ -1,0 +1,32 @@
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+
+ENV:
+  MAX_REPOS_PER_WORKFLOW: 3
+  WORKFLOWS: toJson([ "autorebase", "automerge", "go-test", "go-check" ])
+
+jobs:
+   matrix:
+    if: github.event.pull_request.merged == true
+    name: Trigger copy workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          LINES=$(jq -c ". | _nwise(${{ env.MAX_REPOS_PER_WORKFLOW }})" .github/workflows/config.json | jq -s . | to_entries)
+          echo "::set-output name=targets::$TARGETS"
+  dispatch:
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg: ${{ fromJson(needs.matrix.outputs.targets) }}
+      name: Start copy workflow (batch ${{ matrix.cfg.key }})
+      steps:
+      - uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
+          event-type: copy-workflow
+          client-payload: '{"github": ${{ toJson(github) }}, "workflows": ${{ env.WORKFLOWS }}, "targets": ${{ matrix.cfg.value }}"}'
