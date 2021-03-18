@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workflow: {{ fromJson(github.event.client_payload.workflows) }}
+        workflow: ${{ fromJson(github.event.client_payload.workflows) }}
     name: ${{ matrix.workflow }} workflow
     steps:
       - run: cat "$GITHUB_EVENT_PATH" | jq -M .
