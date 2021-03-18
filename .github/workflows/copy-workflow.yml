@@ -3,12 +3,68 @@ on:
     types: [ copy-workflow ]
 
 jobs:
-  debug:
+  copy:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        cfg: ${{ github.event.client_payload.targets }}
         workflow: ${{ github.event.client_payload.workflows }}
     name: ${{ matrix.workflow }} workflow
+    env:
+      WORKFLOW_DIR: "workflow-repo"
+      FILE: "${{ matrix.workflow }}.yml"
+      NEEDS_UPDATE: 0
+    name: Update ${{ matrix.workflow }} on ${{ matrix.cfg.target }}
     steps:
-      - run: cat "$GITHUB_EVENT_PATH" | jq -M .
+    - name: Event JSON
+      run: cat "$GITHUB_EVENT_PATH" | jq -M .
+    - name: Pull Reqeust Link
+      run: echo ${{ github.event.client_payload.github.pull_request.html_url }}
+    - name: Pull Request Title
+      run: echo ${{ github.event.client_payload.github.pull_request.title }}
+    - name: Checkout ${{ matrix.cfg.target }}
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ matrix.cfg.target }}
+        token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
+        persist-credentials: true
+    - name: Checkout workflow templates
+      uses: actions/checkout@v2
+      with:
+        path: ${{ env.WORKFLOW_DIR }}
+    - name: Add "DO NOT EDIT" header to ${{ env.FILE }}
+      run: |
+        tmp=$(mktemp)
+        cat $WORKFLOW_DIR/workflow-templates/header.yml $WORKFLOW_DIR/workflow-templates/$FILE > $tmp
+        mv $tmp $WORKFLOW_DIR/workflow-templates/$FILE
+    - name: Check if an update to ${{ env.FILE }} is neccessary
+      run: |
+        STATUS=$(cmp --silent .github/workflows/$FILE $WORKFLOW_DIR/workflow-templates/$FILE; echo $?)
+        if [[ $STATUS -ne 0 ]]; then
+          echo "Update needed."
+          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
+        else
+          echo "Files indentical. Skipping."
+        fi
+    - name: Copy ${{ env.FILE }} to target repo
+      if: ${{ env.NEEDS_UPDATE == 1 }}
+      run: |
+        mkdir -p .github/workflows/
+        cp $WORKFLOW_DIR/workflow-templates/$FILE .github/workflows/
+        rm -rf $WORKFLOW_DIR
+    - name: Create Pull Request
+      if: ${{ env.NEEDS_UPDATE == 1 }}
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: "update ${{ env.FILE }}: ${{ github.event.client_payload.github.pull_request.title }}"
+        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.client_payload.githubpull_request.title }}"
+        body: |
+          Change introduced by ${{ github.event.client_payload.github.pull_request.html_url }}.
+          ---
+          You can trigger a rebase by commenting `@ipldbot rebase`.
+        token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
+        committer: ipldbot <ipldbot@users.noreply.github.com>
+        author: ipldbot <ipldbot@users.noreply.github.com>
+        branch: ipldbot/update-${{matrix.workflow }}
+        delete-branch: true
