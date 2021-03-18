@@ -12,6 +12,8 @@ jobs:
     if: github.event.pull_request.merged == true
     name: Trigger copy workflows
     runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.set-matrix.outputs.targets }}
     steps:
       - uses: actions/checkout@v2
       - id: set-matrix
