@@ -6,6 +6,6 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ github.event.client_payload.github.pull_request.title }}
-      - run: echo ${{ github.event.client_payload.targets }}
-      - run: echo ${{ github.event.client_payload.workflows }}
+      - run: jq . ${{ github.event.client_payload.github }}
+      - run: jq . ${{ github.event.client_payload.targets }}
+      - run: jq . ${{ github.event.client_payload.workflows }}
