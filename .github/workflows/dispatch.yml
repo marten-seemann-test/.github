@@ -35,4 +35,4 @@ jobs:
         with:
           token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
           event-type: copy-workflow
-          client-payload: '{"github": ${{ toJson(github) }}, "workflows": "${{ env.WORKFLOWS }}", "targets": ${{ matrix.cfg.value }}"}'
+          client-payload: '{"workflows": ${{ env.WORKFLOWS }}, "targets": ${{ matrix.cfg.value }}"}'
