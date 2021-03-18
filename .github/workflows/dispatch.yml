@@ -5,7 +5,7 @@ on:
 
 env:
   MAX_REPOS_PER_WORKFLOW: 3
-  WORKFLOWS: "[ 'autorebase', 'automerge', 'go-test', 'go-check' ]" # a JSON array of the files to distribute
+  WORKFLOWS: '[ "autorebase", "automerge", "go-test", "go-check" ]' # a JSON array of the files to distribute
 
 jobs:
   matrix:
@@ -19,7 +19,6 @@ jobs:
       - id: set-matrix
         run: |
           TARGETS=$(jq '. | _nwise(3)' .github/workflows/config.json | jq -sc '. | to_entries')
-          echo $TARGETS
           echo "::set-output name=targets::$TARGETS"
   dispatch:
     if: github.event.pull_request.merged == true
@@ -35,4 +34,4 @@ jobs:
         with:
           token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
           event-type: copy-workflow
-          client-payload: '{"github": ${{ toJson(github) }}, "workflows": ${{ env.WORKFLOWS }}, "targets": ${{ matrix.cfg.value }}"}'
+          client-payload: '{ "targets": ${{ matrix.cfg.value }}, "workflows": ${{ env.WORKFLOWS }}" }'
