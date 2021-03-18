@@ -5,7 +5,9 @@ on:
 jobs:
   debug:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     steps:
-      - run: jq . ${{ github.event.client_payload.github }}
+      - run: jq . ${{ github.event }}
       - run: jq . ${{ github.event.client_payload.targets }}
       - run: jq . ${{ github.event.client_payload.workflows }}
