@@ -14,8 +14,9 @@ jobs:
       WORKFLOW_DIR: "workflow-repo"
       FILE: "${{ matrix.workflow }}.yml"
       NEEDS_UPDATE: 0
-       # We overwrite this value if this is the first deployment of this workflow.
+       # We overwrite these values if this is the first deployment of this workflow.
       COMMIT_MSG: "update ${{ matrix.workflow }}.yml: ${{ github.event.client_payload.github.event.pull_request.title }}"
+      PR_TITLE: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
     name: Update ${{ matrix.workflow }} on ${{ matrix.cfg.target }}
     steps:
     - name: Event JSON
@@ -43,7 +44,8 @@ jobs:
       run: |
         if [[ ! -f ".github/workflows/${{ env.FILE }}" ]]; then
           echo "First deployment of this workflow."
-          echo 'COMMIT_MSG="add ${{ env.FILE }} workflow"' >> $GITHUB_ENV
+          echo 'COMMIT_MSG=add ${{ env.FILE }} workflow' >> $GITHUB_ENV
+          echo 'PR_TITLE=add ${{ env.FILE }} workflow' >> $GITHUB_ENV
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
           exit
         fi
@@ -69,7 +71,7 @@ jobs:
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
       with:
         commit-message: ${{ env.COMMIT_MSG }}
-        title: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
+        title: ${{ env.PR_TITLE }}
         body: |
           Change introduced by ${{ github.event.client_payload.github.event.pull_request.html_url }}.
           ---
