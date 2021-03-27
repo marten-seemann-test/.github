@@ -39,8 +39,8 @@ jobs:
     - name: Add "DO NOT EDIT" header to ${{ env.FILE }}
       run: |
         tmp=$(mktemp)
-        cat $WORKFLOW_DIR/workflow-templates/header.yml $WORKFLOW_DIR/workflow-templates/$FILE > $tmp
-        mv $tmp $WORKFLOW_DIR/workflow-templates/$FILE
+        cat $WORKFLOW_DIR/$TEMPLATE_DIR/header.yml $WORKFLOW_DIR/$TEMPLATE_DIR/$FILE > $tmp
+        mv $tmp $WORKFLOW_DIR/$TEMPLATE_DIR/$FILE
     - name: Check if an update to ${{ env.FILE }} is neccessary
       run: |
         if [[ ! -f "${{ env.FILE }}" ]]; then
