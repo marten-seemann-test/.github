@@ -43,7 +43,7 @@ jobs:
       run: |
         if [[ ! -f ".github/workflows/${{ env.FILE }}" ]]; then
           echo "First deployment of this workflow."
-          echo "COMMIT_MSG='add ${{ env.FILE }} workflow'" >> $GITHUB_ENV
+          echo 'COMMIT_MSG="add ${{ env.FILE }} workflow"' >> $GITHUB_ENV
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
           exit
         fi
