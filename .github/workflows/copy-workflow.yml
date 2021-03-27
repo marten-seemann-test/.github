@@ -54,6 +54,10 @@ jobs:
         else
           echo "Files indentical. Skipping."
         fi
+    - name: echo envs
+      run: |
+        echo ${{ env.NEEDS_UPDATE }}
+        echo ${{ env.COMMIT_MSG }}
     - name: Copy ${{ env.FILE }} to target repo
       if: ${{ env.NEEDS_UPDATE == 1 }}
       run: |
@@ -64,7 +68,7 @@ jobs:
       if: ${{ env.NEEDS_UPDATE == 1 }}
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
       with:
-        commit-message: env.COMMIT_MSG
+        commit-message: ${{ env.COMMIT_MSG }}
         title: "${{ matrix.workflow }}: ${{ github.event.client_payload.github.event.pull_request.title }}"
         body: |
           Change introduced by ${{ github.event.client_payload.github.event.pull_request.html_url }}.

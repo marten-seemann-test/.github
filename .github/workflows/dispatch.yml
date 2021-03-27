@@ -5,7 +5,7 @@ on:
 
 env:
   MAX_REPOS_PER_WORKFLOW: 3
-  WORKFLOWS: '[ "autorebase", "automerge", "go-test", "go-check", "test2" ]' # a JSON array of the files to distribute
+  WORKFLOWS: '[ "autorebase", "automerge", "go-test", "go-check", "test3" ]' # a JSON array of the files to distribute
 
 jobs:
   matrix:
