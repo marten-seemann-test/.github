@@ -35,9 +35,9 @@ jobs:
     - name: Create commits
       run: |
         git config user.name ipldbot
-        git config user.email 'ipldbot@users.noreply.github.com'
+        git config user.email "ipldbot@users.noreply.github.com"
         git checkout -b web3-bot/sync
-        for f in $(jq ".[]" <<< '${{ github.event.client_payload.files }}' | xargs -n1); do 
+        for f in $(jq ".[]" <<< '${{ fromJson(github.event.client_payload.files) }}' | xargs -n1); do 
           needs_update=false
           # add DO NOT EDIT header
           tmp=$(mktemp)
@@ -66,6 +66,7 @@ jobs:
             cp $TARGET_DIR/$TEMPLATE_DIR/$f $dir
             git add $f
             git commit -m "$commit_msg"
+            echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
           fi
         done
         rm -rf $TARGET_DIR
