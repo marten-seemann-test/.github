@@ -37,7 +37,7 @@ jobs:
         git config user.name ipldbot
         git config user.email "ipldbot@users.noreply.github.com"
         git checkout -b web3-bot/sync
-        for f in $(jq ".[]" <<< '${{ fromJson(github.event.client_payload.files) }}' | xargs -n1); do 
+        for f in $(jq ".[]" <<< '${{ toJson(github.event.client_payload.files) }}' | xargs -n1); do 
           needs_update=false
           # add DO NOT EDIT header
           tmp=$(mktemp)
