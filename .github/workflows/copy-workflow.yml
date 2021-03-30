@@ -38,7 +38,7 @@ jobs:
         git config user.email "ipldbot@users.noreply.github.com"
         git checkout -b web3-bot/sync
         for f in $(jq ".[]" <<< '${{ toJson(github.event.client_payload.files) }}' | xargs -n1); do 
-          echo "Processing $f."
+          echo -e "\nProcessing $f."
           needs_update=false
           # add DO NOT EDIT header
           tmp=$(mktemp)
@@ -47,17 +47,17 @@ jobs:
           # create commit, if necessary
           commit_msg=""
           if [[ ! -f "$f" ]]; then
-            echo -e "\tFirst deployment."
+            echo "First deployment.\n"
             commit_msg="add $f"
             needs_update=true
           else
             status=$(cmp --silent $f $TARGET_DIR/$TEMPLATE_DIR/$f; echo $?)
             if [[ $status -ne 0 ]]; then
-              echo -e "\tUpdate needed."
+              echo "Update needed."
               commit_msg="update $f"
               needs_update=true
             else
-              echo -e "\tFile indentical. Skipping."
+              echo "File indentical. Skipping."
               continue
             fi
           fi
@@ -71,7 +71,6 @@ jobs:
           fi
         done
         rm -rf $TARGET_DIR
-        git checkout master
     - name: Create Pull Request
       if: ${{ env.NEEDS_UPDATE == 1 }}
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
@@ -84,5 +83,4 @@ jobs:
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         committer: ipldbot <ipldbot@users.noreply.github.com>
         author: ipldbot <ipldbot@users.noreply.github.com>
-        branch: web3-bot/sync
         delete-branch: true
