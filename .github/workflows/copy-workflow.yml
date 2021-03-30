@@ -32,18 +32,18 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: ${{ env.TARGET_DIR }}
-    - name: Add "DO NOT EDIT" header to ${{ env.FILE }}
-      run: |
-        tmp=$(mktemp)
-        cat $TARGET_DIR/$TEMPLATE_DIR/header.yml $TARGET_DIR/$TEMPLATE_DIR/$FILE > $tmp
-        mv $tmp $TARGET_DIR/$TEMPLATE_DIR/$FILE
-    - name: Check if an update to ${{ env.FILE }} is neccessary
+    - name: Create commits
       run: |
         git config user.name ipldbot
         git config user.email 'ipldbot@users.noreply.github.com'
         git checkout -b web3-bot/sync
         for f in $(jq ".[]" <<< '${{ github.event.client_payload.files }}' | xargs -n1); do 
           needs_update=false
+          # add DO NOT EDIT header
+          tmp=$(mktemp)
+          cat $TARGET_DIR/$TEMPLATE_DIR/header.yml $TARGET_DIR/$TEMPLATE_DIR/$f > $tmp
+          mv $tmp $TARGET_DIR/$TEMPLATE_DIR/$f
+          # create commit, if necessary
           commit_msg=""
           if [[ ! -f "$f" ]]; then
             echo "First deployment of $f."
@@ -63,8 +63,8 @@ jobs:
           if [ $needs_update = true ]; then
             dir=$(dirname $f)
             mkdir -p $dir
-            cp $TARGET_DIR/$TEMPLATE_DIR/$FILE $dir
-            git add $file
+            cp $TARGET_DIR/$TEMPLATE_DIR/$f $dir
+            git add $f
             git commit -m "$commit_msg"
           fi
         done
