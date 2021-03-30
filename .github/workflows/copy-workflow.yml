@@ -38,6 +38,7 @@ jobs:
         git config user.email "ipldbot@users.noreply.github.com"
         git checkout -b web3-bot/sync
         for f in $(jq ".[]" <<< '${{ toJson(github.event.client_payload.files) }}' | xargs -n1); do 
+          echo "Processing $f."
           needs_update=false
           # add DO NOT EDIT header
           tmp=$(mktemp)
@@ -46,17 +47,17 @@ jobs:
           # create commit, if necessary
           commit_msg=""
           if [[ ! -f "$f" ]]; then
-            echo "First deployment of $f."
+            echo "\tFirst deployment."
             commit_msg="add $f"
             needs_update=true
           else
             status=$(cmp --silent $f $TARGET_DIR/$TEMPLATE_DIR/$f; echo $?)
             if [[ $status -ne 0 ]]; then
-              echo "Update needed."
+              echo "\tUpdate needed."
               commit_msg="update $f"
               needs_update=true
             else
-              echo "Files indentical. Skipping."
+              echo "\tFile indentical. Skipping."
               continue
             fi
           fi
