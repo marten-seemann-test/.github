@@ -10,7 +10,7 @@ jobs:
       matrix:
         cfg: ${{ github.event.client_payload.targets }}
     env:
-      TARGET_DIR: "target-repo"
+      TEMPLATE_REPO_DIR: "target-repo"
       TEMPLATE_DIR: "templates"
       NEEDS_UPDATE: 0
       PR_TITLE: "sync: ${{ github.event.client_payload.github_event.pull_request.title }}"
@@ -31,7 +31,7 @@ jobs:
     - name: Checkout template repository
       uses: actions/checkout@v2
       with:
-        path: ${{ env.TARGET_DIR }}
+        path: ${{ env.TEMPLATE_REPO_DIR }}
     - name: Create commits
       run: |
         git config user.name ipldbot
@@ -41,8 +41,8 @@ jobs:
           needs_update=false
           # add DO NOT EDIT header
           tmp=$(mktemp)
-          cat $TARGET_DIR/$TEMPLATE_DIR/header.yml $TARGET_DIR/$TEMPLATE_DIR/$f > $tmp
-          mv $tmp $TARGET_DIR/$TEMPLATE_DIR/$f
+          cat $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/header.yml $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/$f > $tmp
+          mv $tmp $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/$f
           # create commit, if necessary
           commit_msg=""
           if [[ ! -f "$f" ]]; then
@@ -50,7 +50,7 @@ jobs:
             commit_msg="add $f"
             needs_update=true
           else
-            status=$(cmp --silent $f $TARGET_DIR/$TEMPLATE_DIR/$f; echo $?)
+            status=$(cmp --silent $f $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/$f; echo $?)
             if [[ $status -ne 0 ]]; then
               echo "Update needed."
               commit_msg="update $f"
@@ -63,13 +63,13 @@ jobs:
           if [ $needs_update = true ]; then
             dir=$(dirname $f)
             mkdir -p $dir
-            cp $TARGET_DIR/$TEMPLATE_DIR/$f $dir
+            cp $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/$f $dir
             git add $f
             git commit -m "$commit_msg"
             echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
           fi
         done
-        rm -rf $TARGET_DIR
+        rm -rf $TEMPLATE_REPO_DIR
     - name: Create Pull Request
       if: ${{ env.NEEDS_UPDATE == 1 }}
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
