@@ -40,9 +40,9 @@ jobs:
     - name: Check if an update to ${{ env.FILE }} is neccessary
       run: |
         git config user.name ipldbot
-        git config user.email 'ipldbot@users.noreply.github.com'
+        git config user.email "ipldbot@users.noreply.github.com"
         git checkout -b web3-bot/sync
-        for f in $(jq ".[]" <<< '${{ github.event.client_payload.files }}' | xargs -n1); do 
+        for f in $(jq ".[]" <<< '${{ fromJson(github.event.client_payload.files) }}' | xargs -n1); do 
           needs_update=false
           commit_msg=""
           if [[ ! -f "$f" ]]; then
@@ -66,6 +66,7 @@ jobs:
             cp $TARGET_DIR/$TEMPLATE_DIR/$FILE $dir
             git add $file
             git commit -m "$commit_msg"
+            echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
           fi
         done
         rm -rf $TARGET_DIR
