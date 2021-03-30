@@ -19,9 +19,9 @@ jobs:
     - name: Event JSON
       run: cat "$GITHUB_EVENT_PATH" | jq -M .
     - name: Pull Reqeust Link
-      run: echo ${{ github.event.client_payload.github_event.pull_request.html_url }}
+      run: echo "${{ github.event.client_payload.github_event.pull_request.html_url }}"
     - name: Pull Request Title
-      run: echo ${{ github.event.client_payload.github_event.pull_request.title }}
+      run: echo "${{ github.event.client_payload.github_event.pull_request.title }}"
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
