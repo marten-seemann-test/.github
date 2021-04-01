@@ -41,16 +41,16 @@ jobs:
     - name: remove Travis on initial deployment
       if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
-        git rm .travis.yml || true
-        if ! git diff --quiet; then
+        if [[ -f .travis.yml ]]; then
+          git rm .travis.yml
           git commit -m "disable Travis"
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: remove CircleCI on initial deployment
       if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
-        git rm -r .circleci || true
-        if ! git diff --quiet; then
+        if [[ -d .circleci ]]; then
+          git rm -r .circleci
           git commit -m "disable CircleCI"
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
