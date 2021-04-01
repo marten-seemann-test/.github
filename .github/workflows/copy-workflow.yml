@@ -39,6 +39,7 @@ jobs:
         if [[ $(git diff-index --quiet HEAD) == 1 ]]; then
           git add .
           git commit -m "run gofmt -s"
+          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: Checkout template repository
       uses: actions/checkout@v2
