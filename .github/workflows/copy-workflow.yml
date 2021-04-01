@@ -28,14 +28,24 @@ jobs:
         repository: ${{ matrix.cfg.target }}
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         persist-credentials: true
+    - name: git config
+      run: |
+        git config user.name ipldbot
+        git config user.email "ipldbot@users.noreply.github.com"
+    - name: run go mod tidy
+      run: |
+        go mod edit -go 1.16
+        go mod tidy
+        if [[ $(git diff-index --quiet HEAD) == 1 ]]; then
+          git add .
+          git commit -m "run gofmt -s"
+        fi
     - name: Checkout template repository
       uses: actions/checkout@v2
       with:
         path: ${{ env.TEMPLATE_REPO_DIR }}
     - name: Create commits
       run: |
-        git config user.name ipldbot
-        git config user.email "ipldbot@users.noreply.github.com"
           for f in $(jq -r ".[]" <<< '${{ toJson(github.event.client_payload.files) }}'); do 
           echo -e "\nProcessing $f."
           # add DO NOT EDIT header
