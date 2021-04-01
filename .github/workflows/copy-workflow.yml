@@ -13,6 +13,7 @@ jobs:
       TEMPLATE_REPO_DIR: "target-repo"
       TEMPLATE_DIR: "templates"
       NEEDS_UPDATE: 0
+      INITIAL_TEST_DEPLOYMENT: 0
       PR_TITLE: "sync: ${{ github.event.client_payload.github_event.pull_request.title }}"
     name: Update ${{ matrix.file }} on ${{ matrix.cfg.target }}
     steps:
@@ -32,17 +33,21 @@ jobs:
       run: |
         git config user.name ipldbot
         git config user.email "ipldbot@users.noreply.github.com"
+    - name: is initial test workflow deployment
+      if [[ ! -f .github/workflows/go-test.yml ]]; then
+        echo "INITIAL_TEST_DEPLOYMENT=1" >> $GITHUB_ENV
+      fi
     - name: remove Travis on initial deployment
+      if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
-        if [[ -f .github/workflows/go-test.yml ]]; then exit; fi
         git rm .travis.yml || true
         if ! git diff --quiet; then
           git commit -m "disable Travis"
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: remove CircleCI on initial deployment
+      if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
-        if [[ -f .github/workflows/go-test.yml ]]; then exit; fi
         git rm -r .circleci || true
         if ! git diff --quiet; then
           git commit -m "disable CircleCI"
