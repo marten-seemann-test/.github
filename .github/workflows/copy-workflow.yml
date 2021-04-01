@@ -12,6 +12,7 @@ jobs:
     env:
       TEMPLATE_REPO_DIR: "target-repo"
       TEMPLATE_DIR: "templates"
+      NEEDS_UPDATE: 0
       INITIAL_TEST_DEPLOYMENT: 0
       PR_TITLE: "sync: ${{ github.event.client_payload.github_event.pull_request.title }}"
     name: Update ${{ matrix.file }} on ${{ matrix.cfg.target }}
