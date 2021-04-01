@@ -34,7 +34,7 @@ jobs:
         git config user.email "ipldbot@users.noreply.github.com"
     - name: remove Travis on initial deployment
       run: |
-        if [[ -f .github/workflows/go-test.yml ]]; then exit fi
+        if [[ -f .github/workflows/go-test.yml ]]; then exit; fi
         git rm .travis.yml || true
         if ! git diff --quiet; then
           git commit -m "disable Travis"
@@ -42,7 +42,7 @@ jobs:
         fi
     - name: remove CircleCI on initial deployment
       run: |
-        if [[ -f .github/workflows/go-test.yml ]]; then exit fi
+        if [[ -f .github/workflows/go-test.yml ]]; then exit; fi
         git rm -r .circleci || true
         if ! git diff --quiet; then
           git commit -m "disable CircleCI"
