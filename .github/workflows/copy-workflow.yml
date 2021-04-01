@@ -32,6 +32,22 @@ jobs:
       run: |
         git config user.name ipldbot
         git config user.email "ipldbot@users.noreply.github.com"
+    - name: remove Travis on initial deployment
+      run: |
+        if [[ -f .github/workflows/go-test.yml ]]; then exit fi
+        git rm .travis.yml || true
+        if ! git diff --quiet; then
+          git commit -m "disable Travis"
+          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
+        fi
+    - name: remove CircleCI on initial deployment
+      run: |
+        if [[ -f .github/workflows/go-test.yml ]]; then exit fi
+        git rm -r .circleci || true
+        if ! git diff --quiet; then
+          git commit -m "disable CircleCI"
+          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
+        fi
     - name: run go mod tidy
       run: |
         go mod edit -go 1.16
