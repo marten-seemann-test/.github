@@ -36,7 +36,7 @@ jobs:
       run: |
         go mod edit -go 1.16
         go mod tidy
-        if [[ $(git diff-index --quiet HEAD) == 1 ]]; then
+        if ! git diff --quiet; then
           git add .
           git commit -m "run gofmt -s"
           echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
