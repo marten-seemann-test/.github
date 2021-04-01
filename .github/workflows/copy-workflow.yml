@@ -12,7 +12,6 @@ jobs:
     env:
       TEMPLATE_REPO_DIR: "target-repo"
       TEMPLATE_DIR: "templates"
-      NEEDS_UPDATE: 0
       INITIAL_TEST_DEPLOYMENT: 0
       PR_TITLE: "sync: ${{ github.event.client_payload.github_event.pull_request.title }}"
     name: Update ${{ matrix.file }} on ${{ matrix.cfg.target }}
@@ -44,7 +43,6 @@ jobs:
         if [[ -f .travis.yml ]]; then
           git rm .travis.yml
           git commit -m "disable Travis"
-          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: remove CircleCI on initial deployment
       if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
@@ -52,7 +50,6 @@ jobs:
         if [[ -d .circleci ]]; then
           git rm -r .circleci
           git commit -m "disable CircleCI"
-          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: run go mod tidy
       run: |
@@ -61,7 +58,6 @@ jobs:
         if ! git diff --quiet; then
           git add .
           git commit -m "run go mod tidy"
-          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: gofmt
       run: |
@@ -69,7 +65,6 @@ jobs:
         if ! git diff --quiet; then
           git add .
           git commit -m "run gofmt -s"
-          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         fi
     - name: Checkout template repository
       uses: actions/checkout@v2
@@ -103,9 +98,10 @@ jobs:
           cp $TEMPLATE_REPO_DIR/$TEMPLATE_DIR/$f $dir
           git add $f
           git commit -m "$commit_msg"
-          echo "NEEDS_UPDATE=1" >> $GITHUB_ENV
         done
         rm -rf $TEMPLATE_REPO_DIR
+    - name: Check if we need to create a PR
+      run: echo "NEEDS_UPDATE=$(git rev-list HEAD...origin/$(git rev-parse --abbrev-ref HEAD) --ignore-submodules --count)" >> $GITHUB_ENV
     - name: Create Pull Request
       if: ${{ env.NEEDS_UPDATE == 1 }}
       uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8 #v3.8.2
