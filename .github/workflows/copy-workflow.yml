@@ -34,9 +34,10 @@ jobs:
         git config user.name ipldbot
         git config user.email "ipldbot@users.noreply.github.com"
     - name: is initial test workflow deployment
-      if [[ ! -f .github/workflows/go-test.yml ]]; then
-        echo "INITIAL_TEST_DEPLOYMENT=1" >> $GITHUB_ENV
-      fi
+      run: |
+        if [[ ! -f .github/workflows/go-test.yml ]]; then
+          echo "INITIAL_TEST_DEPLOYMENT=1" >> $GITHUB_ENV
+        fi
     - name: remove Travis on initial deployment
       if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
