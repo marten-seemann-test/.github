@@ -105,7 +105,7 @@ jobs:
       with:
         title: "sync: update CI config files"
         body: |
-          Syncing to commit ${{ github.event.client_payload.github_event.head_commmit.url }}.
+          Syncing to commit ${{ github.event.client_payload.github_event.head_commit.url }}.
 
           ---
           You can trigger a rebase by commenting `@ipldbot rebase`.
