@@ -1,7 +1,6 @@
 on:
-  pull_request:
+  push:
     branches: [ master ]
-    types: [ closed ]
 
 env:
   MAX_REPOS_PER_WORKFLOW: 3
@@ -9,7 +8,6 @@ env:
 
 jobs:
   matrix:
-    if: github.event.pull_request.merged == true
     name: Trigger copy workflows
     runs-on: ubuntu-latest
     outputs:
@@ -22,7 +20,6 @@ jobs:
           echo $TARGETS
           echo "::set-output name=targets::$TARGETS"
   dispatch:
-    if: github.event.pull_request.merged == true
     needs: [ matrix ]
     runs-on: ubuntu-latest
     strategy:
