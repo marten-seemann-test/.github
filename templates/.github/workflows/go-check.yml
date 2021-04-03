@@ -20,7 +20,12 @@ jobs:
           diff go.sum go.sum.orig
       - name: go fmt
         if: ${{ success() || failure() }} # run this step even if the previous one failed
-        run: gofmt -l .
+        run: |
+          out=$(gofmt -l .)
+          if [[ -z "$out" ]]; then
+            echo $out
+            exit 1
+          fi
       - name: go vet
         if: ${{ success() || failure() }} # run this step even if the previous one failed
         run: go vet ./...
