@@ -14,6 +14,8 @@ jobs:
       TEMPLATE_DIR: "templates"
       NEEDS_UPDATE: 0
       INITIAL_TEST_DEPLOYMENT: 0
+      GITHUB_USER: ""
+      GITHUB_EMAIL: ""
     name: Update ${{ matrix.file }} on ${{ matrix.cfg.target }}
     steps:
     - name: Event JSON
@@ -24,10 +26,26 @@ jobs:
         repository: ${{ matrix.cfg.target }}
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         persist-credentials: true
+    - name: Checkout template repository
+      uses: actions/checkout@v2
+      with:
+        path: ${{ env.TEMPLATE_REPO_DIR }}
+    - name: config
+      run: |
+        org=$(echo "${{ matrix.cfg.target }}" | cut -f1 -d"/")
+        user=$(jq -r --arg v "$org" '.[$v].user' $TEMPLATE_REPO_DIR/.github/workflows/users.json)
+        echo $user
+        if [[ "$user" == "null" ]]; then
+          echo "No configuration found for GitHub org $org."
+          exit 1
+        fi
+        echo "Using GitHub user $user for $org."
+        echo "GITHUB_USER=$user" >> $GITHUB_ENV
+        echo "GITHUB_EMAIL=$user@users.noreply.github.com" >> $GITHUB_ENV
     - name: git config
       run: |
-        git config user.name ipldbot
-        git config user.email "ipldbot@users.noreply.github.com"
+        git config user.name ${{ env.GITHUB_USER }}
+        git config user.email ${{ env.GITHUB_EMAIL }}
     - name: is initial test workflow deployment
       run: |
         if [[ ! -f .github/workflows/go-test.yml ]]; then
@@ -52,20 +70,18 @@ jobs:
         go mod edit -go 1.16
         go mod tidy
         if ! git diff --quiet; then
-          git add .
+          git add go.mod go.sum
           git commit -m "run go mod tidy"
         fi
     - name: gofmt
       run: |
         gofmt -s -w .
         if ! git diff --quiet; then
-          git add .
+          git diff
+          git status
+          git add -- . ':!${{ env.TEMPLATE_REPO_DIR }}'
           git commit -m "run gofmt -s"
         fi
-    - name: Checkout template repository
-      uses: actions/checkout@v2
-      with:
-        path: ${{ env.TEMPLATE_REPO_DIR }}
     - name: Create commits
       run: |
         for f in $(jq -r ".[]" <<< '${{ toJson(github.event.client_payload.files) }}'); do 
@@ -108,9 +124,9 @@ jobs:
           Syncing to commit ${{ github.event.client_payload.github_event.head_commit.url }}.
 
           ---
-          You can trigger a rebase by commenting `@ipldbot rebase`.
+          You can trigger a rebase by commenting `@${{ env.GITHUB_USER }} rebase`.
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
-        committer: ipldbot <ipldbot@users.noreply.github.com>
-        author: ipldbot <ipldbot@users.noreply.github.com>
-        branch: ci-sync
+        committer: ${{ env.GITHUB_USER }} <${{ env.GITHUB_EMAIL }}>
+        author: ${{ env.GITHUB_USER }} <${{ env.GITHUB_EMAIL }}>
+        branch: sync
         delete-branch: true
