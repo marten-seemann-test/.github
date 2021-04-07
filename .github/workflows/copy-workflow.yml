@@ -10,7 +10,7 @@ jobs:
       matrix:
         cfg: ${{ github.event.client_payload.targets }}
     env:
-      TEMPLATE_REPO_DIR: "target-repo"
+      TEMPLATE_REPO_DIR: "template-repo"
       TEMPLATE_DIR: "templates"
       NEEDS_UPDATE: 0
       INITIAL_TEST_DEPLOYMENT: 0
