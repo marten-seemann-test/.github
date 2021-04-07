@@ -87,7 +87,8 @@ jobs:
         if ! git diff --quiet; then
           git diff
           git status
-          git add -- . ':!${{ env.TEMPLATE_REPO_DIR }}'
+          git submodule status
+          git add main.go
           git commit -m "run gofmt -s"
         fi
     - name: Create commits
