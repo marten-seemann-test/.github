@@ -112,5 +112,5 @@ jobs:
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         committer: ipldbot <ipldbot@users.noreply.github.com>
         author: ipldbot <ipldbot@users.noreply.github.com>
-        branch: web3-bot-sync
+        branch: ci-sync
         delete-branch: true
