@@ -21,6 +21,10 @@ jobs:
     steps:
     - name: Event JSON
       run: cat "$GITHUB_EVENT_PATH" | jq -M .
+    - name: Checkout template repository
+      uses: actions/checkout@v2
+      with:
+        path: ${{ env.TEMPLATE_REPO_DIR }}
     - name: Checkout ${{ matrix.cfg.target }}
       uses: actions/checkout@v2
       with:
@@ -28,10 +32,6 @@ jobs:
         repository: ${{ matrix.cfg.target }}
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         persist-credentials: true
-    - name: Checkout template repository
-      uses: actions/checkout@v2
-      with:
-        path: ${{ env.TEMPLATE_REPO_DIR }}
     - name: config
       run: |
         org=$(echo "${{ matrix.cfg.target }}" | cut -f1 -d"/")
