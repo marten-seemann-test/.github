@@ -25,7 +25,7 @@ jobs:
           fi
         done
         echo "::set-output name=status::true"
-    - name: echo ${{ steps.should_automerge.outputs.status }}
+    - run: echo ${{ steps.should_automerge.outputs.status }}
     - name: Wait on tests
       if: steps.should_automerge.outputs.status
       uses: lewagon/wait-on-check-action@bafe56a6863672c681c3cf671f5e10b20abf2eaa # v0.2
