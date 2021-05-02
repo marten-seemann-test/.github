@@ -7,7 +7,7 @@ jobs:
     if: github.event.pull_request.user.login == 'ipldbot'
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.should-automerge.status }}
+      status: ${{ steps.should-automerge.outputs.status }}
     steps:
     - uses: actions/checkout@v2
       with:
