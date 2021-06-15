@@ -74,7 +74,7 @@ jobs:
     - name: run go mod tidy
       run: |
         cd $TARGET_REPO_DIR
-        go mod edit -go 1.16
+        go mod edit -go 1.15
         go mod tidy
         if ! git diff --quiet; then
           git add go.mod go.sum
@@ -143,3 +143,10 @@ jobs:
         author: ${{ env.GITHUB_USER }} <${{ env.GITHUB_EMAIL }}>
         branch: sync
         delete-branch: true
+    - name: Create GitHub Project
+      if: ${{ env.NEEDS_UPDATE }}
+      uses: technote-space/create-project-card-action@v1
+      with:
+        PROJECT: Copy Workflow
+        COLUMN: In Progress
+
