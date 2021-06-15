@@ -145,8 +145,8 @@ jobs:
         delete-branch: true
     - name: Create GitHub Project
       if: ${{ env.NEEDS_UPDATE }}
-      uses: technote-space/create-project-card-action@v1
+      uses: srggrs/assign-one-project-github-action@1.2.1
       with:
-        PROJECT: Copy Workflow
-        COLUMN: In Progress
+        project: 'https://github.com/marten-seemann-test/.github/projects/1'
+        column_name: 'In progress'
 
