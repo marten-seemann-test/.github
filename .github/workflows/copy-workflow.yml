@@ -146,6 +146,8 @@ jobs:
     - name: Create GitHub Project
       if: ${{ env.NEEDS_UPDATE }}
       uses: srggrs/assign-one-project-github-action@1.2.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         project: 'https://github.com/marten-seemann-test/.github/projects/1'
         column_name: 'In progress'
