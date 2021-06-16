@@ -28,6 +28,8 @@ jobs:
         cfg: ${{ fromJson(needs.matrix.outputs.targets) }}
     name: Start copy workflow (batch ${{ matrix.cfg.key }})
     steps:
+      - name: Event JSON
+        run: cat "$GITHUB_EVENT_PATH" | jq -M .
       - uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
