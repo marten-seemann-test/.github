@@ -1,6 +1,10 @@
+# This workflow is triggered by the dispatch workflow.
+
 on:
   repository_dispatch:
     types: [ copy-workflow ]
+
+name: Deploy
 
 jobs:
   copy:
@@ -32,6 +36,12 @@ jobs:
         repository: ${{ matrix.cfg.target }}
         token: ${{ secrets.IPLDBOT_GITHUB_TOKEN }}
         persist-credentials: true
+    - uses: actions/setup-go@v2
+      with:
+        # This should be the same Go version we use in the go-check workflow.
+        # go mod tidy, go vet, staticcheck and gofmt might behave differently depending on the version.
+        stable: 'false'
+        go-version: "1.17.0-rc1"
     - name: config
       run: |
         org=$(echo "${{ matrix.cfg.target }}" | cut -f1 -d"/")
@@ -71,24 +81,58 @@ jobs:
           git rm -r .circleci
           git commit -m "disable CircleCI"
         fi
-    - name: run go mod tidy
+    - name: remove gx (on initial deployment)
+      if: ${{ env.INITIAL_TEST_DEPLOYMENT == 1 }}
       run: |
         cd $TARGET_REPO_DIR
-        go mod edit -go 1.15
+        if [[ -d .gx ]]; then
+          git rm -r .gx
+          git commit -m "remove .gx"
+        fi
+    - name: bump go.mod go version if needed
+      run: |
+        cd $TARGET_REPO_DIR
+
+        # We want our modules to support two Go versions at a time.
+        # As of August 2021, Go 1.17 is the latest stable.
+        # go.mod's Go version declares the language version being used.
+        # As such, it has to be the minimum of all Go versions supported.
+        # Bump this every six months, as new Go versions come out.
+        TARGET_VERSION=1.16
+
+        # Note that the "<" comparison doesn't understand semver,
+        # but it should be good enough for the foreseeable future.
+        CURRENT_VERSION=$(go list -m -f {{.GoVersion}})
+        if [[ $CURRENT_VERSION < $TARGET_VERSION ]]; then
+
+          # Update the version in go.mod. This alone ensures there's a diff.
+          go mod edit -go $TARGET_VERSION
+
+          # In the future, "go fix" may make changes to Go code,
+          # such as to adapt to language changes or API deprecations.
+          # This is largely a no-op as of Go 1.17, and that's fine.
+          go fix
+          git add .
+
+          # We don't tidy, because the next step does that.
+          # Separate commits also help with reviews.
+
+          git commit -m "bump go.mod to go $TARGET_VERSION and run go fix"
+        fi
+    - name: go mod tidy
+      run: |
+        cd $TARGET_REPO_DIR
         go mod tidy
         if ! git diff --quiet; then
-          git add go.mod go.sum
+          git add .
           git commit -m "run go mod tidy"
         fi
-    - name: gofmt
+    - name: gofmt -s
       run: |
         cd $TARGET_REPO_DIR
         gofmt -s -w .
         if ! git diff --quiet; then
-          git diff
-          git status
-          git submodule status
-          git add main.go
+          git add .
           git commit -m "run gofmt -s"
         fi
     - name: Create commits
@@ -143,12 +187,3 @@ jobs:
         author: ${{ env.GITHUB_USER }} <${{ env.GITHUB_EMAIL }}>
         branch: sync
         delete-branch: true
-    - name: Create GitHub Project
-      if: ${{ env.NEEDS_UPDATE }}
-      uses: srggrs/assign-one-project-github-action@1.2.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        project: 'https://github.com/marten-seemann-test/.github/projects/1'
-        column_name: 'In progress'
-
