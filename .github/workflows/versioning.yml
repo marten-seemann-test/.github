@@ -1,0 +1,7 @@
+name: Versioning Test
+on: [ workflow_call ]
+
+jobs:
+  versioning:
+    steps:
+      - run: echo "v1.0"
